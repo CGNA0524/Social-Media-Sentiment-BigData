@@ -1,0 +1,884 @@
+====================================================================================================
+               PROJECT IDEA & ARCHITECTURE BLUEPRINT: A TO Z COMPREHENSIVE GUIDE
+                   SOCIAL MEDIA SENTIMENT ANALYSIS USING BIG DATA COMPUTATION
+====================================================================================================
+
+DOCUMENT METADATA:
+- Project Name        : Social Media Sentiment Analysis Using Big Data
+- Author / Engineer   : Chirag Nagra (CGNA0524)
+- Document Title      : Social-Media-Sentiment-BigData idea
+- Format              : Plain Text Technical Specification & Defense Guide (.txt)
+- Academic Context    : Big Data Computation (BDC) / Advanced NLP / Distributed Systems Engineering
+- Target Environment  : Python 3.11.9 (Windows 64-bit / Linux / Docker compatible)
+- Repository URL      : https://github.com/CGNA0524/Social-Media-Sentiment-BigData.git
+
+====================================================================================================
+TABLE OF CONTENTS:
+1.  PROJECT AIM & HIGH-LEVEL VISION
+2.  PROBLEM STATEMENT & INDUSTRIAL RELEVANCE
+3.  WHY THIS PROJECT WAS BUILT (MOTIVATION & CORE DRIVERS)
+4.  HOW THE PROJECT WAS BUILT (STEP-BY-STEP IMPLEMENTATION METHODOLOGY)
+5.  COMPLETE TECHNOLOGY STACK & LIBRARIES BREAKDOWN
+6.  WHY SPECIFIC TECHNOLOGIES WERE CHOSEN & DETAILED COMPARATIVE ANALYSIS:
+    6.1.  Multinomial Naive Bayes vs. Logistic Regression vs. BERT & RoBERTa
+    6.2.  Batch Processing (MapReduce/Spark) vs. Real-Time Streaming (Apache Flink)
+    6.3.  Relational Storage (SQLite) vs. Document Store (MongoDB) vs. Search Engine (Elasticsearch)
+    6.4.  Scheduled Scripts vs. Apache Airflow Workflow Orchestration
+7.  COMPLETE PROJECT DIRECTORY STRUCTURE & FILE SITEMAP
+8.  END-TO-END PIPELINE ARCHITECTURES (BATCH, STREAMING, INFERENCE, ORCHESTRATION)
+9.  DEEP-DIVE MODULE-BY-MODULE FUNCTIONAL BREAKDOWN
+10. THE 5 TEACHER-MANDATED ADVANCED ADDITIONS IN DETAIL:
+    - Feature 1: Transformer-Based NLP (BERT & RoBERTa)
+    - Feature 2: Apache Flink Real-Time Distributed Stream Processing
+    - Feature 3: Elasticsearch Distributed Indexing & Search
+    - Feature 4: Apache Airflow 7-Stage DAG Orchestration
+    - Feature 5: Aspect-Based Sentiment Analysis (ABSA)
+11. DATASET SCHEMAS, PREPROCESSING LOGIC & NEGATION PRESERVATION
+12. EMPIRICAL RESULTS, PERFORMANCE METRICS & BENCHMARKS
+13. TESTING, QUALITY ASSURANCE & VERIFICATION (40 TESTS)
+14. COMPREHENSIVE VIVA VOCE & TECHNICAL INTERVIEW PREPARATION (15 QUESTIONS & ANSWERS)
+15. SYSTEM LIMITATIONS & FUTURE SCOPE
+====================================================================================================
+
+
+====================================================================================================
+1. PROJECT AIM & HIGH-LEVEL VISION
+====================================================================================================
+The primary aim of this project is to architect, develop, and benchmark an enterprise-grade,
+distributed-capable Big Data and Natural Language Processing (NLP) ecosystem that can ingest, clean,
+classify, index, stream, and analyze massive volumes of social media conversations in real time.
+
+Specific Strategic Goals:
+1. Ingestion at Scale: Successfully ingest, validate, and process massive social media corpora,
+   including the 1.6 Million-row Sentiment140 dataset (239 MB), the 14,640-row US Airline Sentiment
+   dataset, and relational SQLite dumps without memory overflow (OOM).
+2. Intelligent NLP Normalization: Transform noisy, slang-ridden social media micro-posts into clean,
+   vectorizable features while strictly preserving critical sentiment signals (specifically negation
+   words like "not", "no", "never", and contraction forms).
+3. Machine Learning Baseline Benchmarking: Implement and compare classic statistical machine learning
+   classifiers (Multinomial Naive Bayes with Laplace smoothing vs. L-BFGS Logistic Regression) under a
+   strict, no-leakage scikit-learn Pipeline architecture.
+4. Contextual Deep Learning: Upgrade the baseline with state-of-the-art Transformer models (DistilBERT
+   and CardiffNLP Twitter-RoBERTa) to capture nuanced syntactic and semantic dependencies.
+5. Real-Time Stream Analytics: Build an Apache Flink-inspired event-driven streaming pipeline capable
+   of handling micro-bursts of tweets with tumbling window aggregations, watermarking, and throughput
+   monitoring.
+6. Fast Distributed Search: Deploy Elasticsearch with tailored schema mappings (supporting nested
+   aspect objects) to enable sub-second keyword and multi-faceted sentiment search.
+7. Automated Big Data Orchestration: Design a robust 7-stage Apache Airflow Directed Acyclic Graph (DAG)
+   automating the entire lifecycle from ingestion to audit report generation.
+8. Fine-Grained Aspect Mining: Implement Aspect-Based Sentiment Analysis (ABSA) with clause boundary
+   segmentation to solve the "mixed sentiment" problem where multiple contrasting opinions coexist in
+   the same post.
+9. Interactive Dashboard: Provide a modern, dark-themed Streamlit web interface for interactive
+   demonstrations, live model benchmarking, MapReduce labs, and comprehensive project defense.
+
+
+====================================================================================================
+2. PROBLEM STATEMENT & INDUSTRIAL RELEVANCE
+====================================================================================================
+Social media platforms (such as X/Twitter, Reddit, and Instagram) produce hundreds of millions of
+user-generated posts every single day. For corporations, airlines, governments, and brand managers,
+understanding consumer sentiment is vital for:
+- Brand reputation tracking
+- Crisis management and customer churn prevention
+- Product defect detection and feature feedback
+- Real-time market sentiment analysis
+
+However, analyzing social media text poses fundamental Big Data & NLP challenges:
+
+A. Volume & Velocity (Big Data Constraints):
+   Traditional relational databases (RDBMS) like MySQL or PostgreSQL choke when asked to execute
+   full-text tokenization and n-gram vectorization across millions of streaming rows in real time.
+   They lack native horizontal scaling and parallel map-reduce distributed aggregation primitives.
+
+B. Linguistic Noise & Slang:
+   Social media text is notorious for misspellings, excessive punctuation (e.g., "soooo bad!!!!"),
+   user mentions (@airline), URLs, and emojis. Standard text cleaners blindly strip everything or
+   apply generic stopword filters. Removing "not" from "not good" turns a severely negative tweet into
+   a positive "good", completely inverting the classification.
+
+C. The "Mixed Opinion" Blind Spot:
+   Consider the sentence: "The camera is excellent, but the battery life is disappointing."
+   A standard binary sentiment classifier evaluates the overall text, cancels positive against
+   negative signals, and outputs an ambiguous "neutral" score. In reality, the customer loves the
+   camera (+1.0) and hates the battery (-1.2). Global classifiers miss actionable product feedback.
+
+D. Architecture Silos:
+   Most academic projects either implement a simple Jupyter notebook with a basic model OR a dummy web
+   UI. Very few demonstrate an end-to-end production architecture connecting ingestion, cleaning,
+   parallel computing, deep learning, stream processing, search indexing, and automated orchestration.
+
+
+====================================================================================================
+3. WHY THIS PROJECT WAS BUILT (MOTIVATION & CORE DRIVERS)
+====================================================================================================
+1. Bridging Theory and Production:
+   In university curricula, students learn Big Data concepts (MapReduce, HDFS, Spark, Flink, Airflow)
+   and NLP concepts (TF-IDF, Naive Bayes, Transformers) in isolated theory classes. This project was
+   built to unite all these distributed systems into one fully functioning, cohesive, runnable software
+   platform.
+
+2. Fulfilling Advanced Teacher-Mandated Engineering Requirements:
+   The university curriculum required upgrading the baseline social media sentiment model with five
+   advanced enterprise-grade technologies:
+   - Transformer NLP (BERT & RoBERTa)
+   - Real-Time Streaming (Apache Flink)
+   - Distributed Indexing & Search (Elasticsearch)
+   - Workflow Orchestration (Apache Airflow)
+   - Aspect-Based Sentiment Analysis (ABSA)
+
+3. Empirical Honesty:
+   Instead of fabricating metrics or faking distributed tools, this project executes real inference on
+   every model, validates every pipeline task, tests with 40 automated unit tests, and provides genuine
+   fallbacks (such as local stream simulators and offline search sinks) so that the application never
+   crashes even when external server clusters are offline.
+
+
+====================================================================================================
+4. HOW THE PROJECT WAS BUILT (STEP-BY-STEP IMPLEMENTATION METHODOLOGY)
+====================================================================================================
+The project was engineered through a disciplined 10-phase software engineering lifecycle:
+
+Phase 1: Project Environment & Dependency Foundation
+- Configured a dedicated Windows Python 3.11.9 virtual environment (`.venv`).
+- Audited package compatibility between pandas, scikit-learn, PyTorch, Transformers, and Elasticsearch.
+- Maintained a clean configuration template (`.env.example`) and comprehensive `.gitignore`.
+
+Phase 2: Data Ingestion & ETL Engineering (`src/data_processing/load_dataset.py`)
+- Built chunked, memory-safe loaders for the 1.6 Million-row Sentiment140 CSV (latin-1 encoding,
+  headerless, binary labels 0 and 4).
+- Built normalized loaders for the 14,640-row US Airline Tweets CSV (3 classes: neg, neu, pos).
+- Built read-only SQLite database connector (`file:database.sqlite?mode=ro`).
+- Implemented stratified sampling and automated caching to Parquet format (`data/processed/`).
+
+Phase 3: Negation-Preserving Preprocessing Pipeline (`src/data_processing/preprocess.py`)
+- Created regex engines for URL stripping, user mention removal, HTML unescaping, and character de-duplication.
+- Expanded conversational contractions ("can't" -> "cannot", "won't" -> "will not").
+- Engineered custom stopword filtering that explicitly retains sentiment-bearing negation tokens
+  ("not", "no", "never", "cannot", "hardly", "barely").
+
+Phase 4: Baseline Model Training & Benchmarking (`src/models/train.py`, `evaluate.py`, `predict.py`)
+- Implemented `TfidfVectorizer` (unigrams + bigrams, sublinear TF scaling, max 25,000 features).
+- Bound vectorizer and classifiers inside a scikit-learn `Pipeline` to prevent data leakage.
+- Trained and benchmarked Multinomial Naive Bayes (Laplace smoothing alpha=1.0) against Logistic
+  Regression (L-BFGS solver).
+- Persisted serialized model binaries (`models/*.joblib`) with metadata.
+
+Phase 5: Parallel Big Data Simulation Engine (`src/big_data/`)
+- Developed a multi-worker `MapReduceEngine` simulating the true Hadoop/MapReduce architecture:
+  Input Splits -> Multi-Threaded Mappers -> Local Combiners -> Shuffle & Sort -> Reducers.
+- Created standalone Hadoop Streaming executable scripts (`hadoop_streaming_mapper.py` and
+  `hadoop_streaming_reducer.py`) for stdin/stdout piping.
+- Integrated a PySpark / Local Vectorized abstraction with execution telemetry.
+- Built a NoSQL persistence layer supporting live MongoDB with automatic SQLite/JSON fallback.
+
+Phase 6: Transformer Deep Learning Integration (`src/models/transformer_models.py`)
+- Integrated Hugging Face Transformers and CPU-compatible PyTorch.
+- Loaded `distilbert-base-uncased-finetuned-sst-2-english` (66M parameters, SST-2 binary sentiment).
+- Loaded `cardiffnlp/twitter-roberta-base-sentiment-latest` (125M parameters, trained on 124M tweets).
+- Built lazy singleton loading and cache unloading mechanisms to protect RAM.
+- Implemented unified multi-model comparison functions.
+
+Phase 7: Fine-Grained Aspect-Based Sentiment Analysis (`src/models/absa_engine.py`)
+- Developed a discourse boundary segmenter that splits sentences across contrastive conjunctions
+  ("but", "however", "although", "yet", "while").
+- Extracted domain opinion targets (compound nouns and entities: camera, battery life, crew, food).
+- Computed localized sentiment polarities and synthesized overall sentence sentiment (Mixed, Positive,
+  Negative, or Neutral).
+
+Phase 8: Distributed Search & Indexing Engine (`src/search/`)
+- Implemented official Elasticsearch client wrapper with environment variable authentication.
+- Defined idempotent index schema mapping with nested properties for ABSA results.
+- Built bulk indexing services (`helpers.bulk`) and full-text keyword search with multi-match and
+  boolean filter queries (sentiment, time range, aspect).
+- Created a resilient offline fallback to local JSONL files.
+
+Phase 9: Real-Time Stream Processing (`src/streaming/`)
+- Engineered a streaming event generator emitting timestamped tweet records.
+- Built a 4-stage stream pipeline: Validation -> Normalization -> Sentiment & ABSA -> Sinks.
+- Implemented tumbling event-time window aggregations, real-time throughput metrics (EPS), and
+  dispatch to Elasticsearch and JSONL sinks.
+- Provided both a verified local simulator and a declarative PyFlink DataStream job specification.
+
+Phase 10: Automated Workflow Orchestration (`src/orchestration/`)
+- Developed modular Python callables for 7 pipeline stages.
+- Created a standard Apache Airflow DAG (`social_media_sentiment_pipeline.py`) with linear task
+  dependencies (`t1 >> t2 >> t3 >> t4 >> t5 >> t6 >> t7`).
+- Implemented `AirflowPipelineRunner` allowing full sequential execution and audit logging directly on
+  Windows without requiring an active Linux Airflow daemon.
+
+Phase 11: Interactive Presentation Layer & Comprehensive Testing (`app.py`, `tests/`)
+- Built an expansive, dark-themed Streamlit web dashboard spanning 13 interactive pages.
+- Authored 40 automated unit tests achieving 100% pass rate.
+- Committed and pushed the entire production codebase to GitHub.
+
+
+====================================================================================================
+5. COMPLETE TECHNOLOGY STACK & LIBRARIES BREAKDOWN
+====================================================================================================
+| Category                     | Technology / Library       | Version       | Primary Responsibility in Project |
+| :--------------------------- | :------------------------- | :------------ | :--------------------------------- |
+| **Language & Environment**   | Python                     | 3.11.9        | Core programming language runtime |
+|                              | PowerShell / Windows       | 10/11 x64     | CLI execution and automation shell |
+| **Data Processing & ETL**    | pandas                     | 3.0.6         | Tabular data manipulation, chunked CSV loading |
+|                              | NumPy                      | 2.4.6         | Numerical array math & vector operations |
+|                              | NLTK                       | 3.10.3        | Tokenization, stopwords, stemming utilities |
+|                              | PyArrow                    | 26.0.0        | Fast columnar Parquet cache read/write |
+| **Machine Learning**         | scikit-learn               | 1.9.1         | TF-IDF, Naive Bayes, Logistic Regression, Pipeline |
+|                              | joblib                     | 1.6.0         | Fast model serialization & deserialization |
+| **Transformer Deep Learning**| PyTorch (CPU)              | 2.14.1+cpu    | Tensor operations, CPU neural network inference |
+|                              | Hugging Face Transformers  | 5.20.2        | Pretrained DistilBERT and RoBERTa models |
+|                              | tokenizers                 | 0.23.3        | Subword BPE and WordPiece tokenization |
+|                              | huggingface_hub            | 2.2.0         | Local caching and model weight downloads |
+| **Distributed Search**       | Elasticsearch Client       | 9.5.1         | Official client, connection pooling, bulk indexing |
+|                              | elastic-transport          | 9.4.2         | Resilient HTTP transport & retry logic |
+| **Stream Processing**        | Flink Stream Engine        | Custom Spec   | 4-Stage streaming pipeline, tumbling windows |
+|                              | PyFlink Architecture       | 2.3.0 Spec    | Declarative DataStream API definition |
+| **Workflow Orchestration**   | Apache Airflow DAG         | 2.x Spec      | 7-Stage DAG with linear dependencies |
+|                              | Modular Pipeline Runner    | Custom Engine | Sub-second DAG parsing, standalone Windows run |
+| **Persistence / Storage**    | MongoDB via pymongo        | 4.19.0        | NoSQL document store integration |
+|                              | SQLite3                    | Built-in      | Relational query engine & offline fallback sink |
+| **Web Presentation**         | Streamlit                  | 1.66.0        | 13-page interactive web dashboard |
+|                              | Matplotlib & Seaborn       | 3.11 & 0.13   | Statistical charts, confusion matrices, donuts |
+| **Testing & Quality**        | pytest                     | 9.1.1         | Test runner for all 40 automated unit tests |
+
+
+====================================================================================================
+6. WHY SPECIFIC TECHNOLOGIES WERE CHOSEN & DETAILED COMPARATIVE ANALYSIS
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+6.1. Multinomial Naive Bayes vs. Logistic Regression vs. BERT & RoBERTa
+----------------------------------------------------------------------------------------------------
+Why multiple models?
+In enterprise data science, no single model is best for every scenario. There is always a trade-off
+between inference latency, memory consumption, and contextual accuracy.
+
+A. Multinomial Naive Bayes (Baseline):
+   - Mechanism: Calculates conditional probability P(Class | Words) using Bayes' Theorem with Laplace
+     smoothing (alpha=1.0). Assumes all words are conditionally independent given the class.
+   - Pros: Blazing fast training (< 1 second for 50,000 tweets) and ultra-low inference latency (< 1.5 ms).
+   - Cons: Cannot understand word order or negations separated from adjectives (e.g., "not really good").
+   - Role in Project: Curriculum baseline and ultra-fast real-time streaming filter.
+
+B. Logistic Regression (Comparison):
+   - Mechanism: Linear classifier optimizing weights jointly via binary cross-entropy loss (log loss)
+     using the L-BFGS solver.
+   - Pros: Captures correlations between n-grams (e.g., "not_good" bigram), yielding higher accuracy (77.53%
+     vs 76.22%) and better calibrated probabilities (ROC-AUC 0.8566 vs 0.8433).
+   - Cons: Still bound to fixed vocabulary; cannot generalize to out-of-vocabulary slang.
+
+C. DistilBERT (Contextual Transformer):
+   - Mechanism: 6-layer distilled transformer using self-attention heads trained on BookCorpus and Wikipedia.
+   - Pros: Understands syntax and semantics bidirectionally; 40% smaller and 60% faster than full BERT-base.
+   - Cons: Higher CPU latency (~25 ms per tweet).
+   - Role in Project: Contextual binary sentiment scoring with 99.9% confidence on clean reviews.
+
+D. Twitter RoBERTa (CardiffNLP):
+   - Mechanism: 12-layer RoBERTa architecture pre-trained on 124 Million real-world Twitter posts.
+   - Pros: Specifically tuned for social media syntax, emojis, hashtags, and informal speech. Supports 3
+     genuine classes (negative, neutral, positive).
+   - Cons: Largest model checkpoint (~499 MB), ~45 ms latency on CPU.
+   - Role in Project: Premium contextual social media analyzer.
+
+----------------------------------------------------------------------------------------------------
+6.2. Batch Processing (MapReduce/Spark) vs. Real-Time Streaming (Apache Flink)
+----------------------------------------------------------------------------------------------------
+- MapReduce & Spark (Batch):
+  Designed for bounded, historical datasets (e.g., processing the full 1.6M Sentiment140 corpus). Reads
+  from disk, splits across workers, performs heavy aggregations, and writes results. High throughput,
+  high latency (seconds to minutes).
+- Apache Flink (Streaming):
+  Designed for unbounded, live data streams (e.g., live Twitter firehose). Processes records one-by-one
+  or in micro-windows as they arrive. Uses event-time watermarking to handle out-of-order data. Low
+  latency (milliseconds), continuous throughput.
+
+Why both in our project?
+A complete Big Data platform requires the Lambda/Kappa architecture: Spark/MapReduce handles deep
+historical model retraining, while Flink processes incoming live tweets and updates sliding window metrics.
+
+----------------------------------------------------------------------------------------------------
+6.3. Relational Storage (SQLite) vs. Document Store (MongoDB) vs. Search Engine (Elasticsearch)
+----------------------------------------------------------------------------------------------------
+- SQLite (RDBMS):
+  ACID compliant, relational tabular schema. Ideal for small, structured metadata (e.g., the US Airline
+  Tweets database). Unsuitable for high-throughput distributed writes or inverted-index text search.
+- MongoDB (NoSQL Document Store):
+  Flexible JSON/BSON document schema. Easily stores semi-structured tweet objects with dynamic metadata
+  (user profile, geo coordinates, hashtags). High write performance.
+- Elasticsearch (Distributed Search Engine):
+  Built on Apache Lucene with inverted indices and BM25 relevance scoring. While MongoDB can store
+  documents, Elasticsearch excels at fuzzy full-text keyword search, nested object queries (ABSA
+  aspect filtering), and real-time faceted aggregations.
+
+----------------------------------------------------------------------------------------------------
+6.4. Scheduled Scripts vs. Apache Airflow Workflow Orchestration
+----------------------------------------------------------------------------------------------------
+- Why not just run a Python script or cron job?
+  Ordinary scripts lack:
+  * Directed Acyclic Graph (DAG) dependency management (Stage 2 cannot run if Stage 1 fails).
+  * Automated retries with exponential backoff on transient network failures.
+  * Task-level idempotency and independent re-runability.
+  * Visual audit trails, execution duration tracking, and centralized logging.
+- Airflow provides a robust, enterprise-grade control plane ensuring every step (Ingest -> Clean ->
+  Predict -> ABSA -> Index -> Report) executes reliably with zero data corruption.
+
+
+====================================================================================================
+7. COMPLETE PROJECT DIRECTORY STRUCTURE & FILE SITEMAP
+====================================================================================================
+```
+C:\Users\NC\Desktop\Social-Media-Sentiment-BigData\
+├── .env.example                     # Environment configuration template (ES, Mongo, Flink, Airflow)
+├── .gitignore                       # Strict VCS rules excluding 239MB datasets, .venv, caches
+├── app.py                           # 1,571-line interactive Streamlit dashboard (13 pages)
+├── README.md                        # Master project documentation with architecture diagrams
+├── requirements.txt                 # Production dependencies (torch, transformers, elasticsearch)
+├── Social-Media-Sentiment-BigData idea.txt  # THIS COMPREHENSIVE A-TO-Z BLUEPRINT FILE
+│
+├── .streamlit/
+│   └── config.toml                  # Dark theme styling, port (8501), and server options
+│
+├── data/
+│   ├── raw/                         # Raw, immutable datasets (preserved on local disk)
+│   │   ├── training.1600000.processed.noemoticon.csv  # 1.6M Sentiment140 CSV (238.8 MB)
+│   │   ├── Tweets.csv               # 14,640 US Airline Tweets CSV (3.4 MB)
+│   │   └── database.sqlite          # SQLite relational database (5.0 MB)
+│   └── processed/                   # Intermediate Parquet caches, JSONL sinks, audit logs
+│       ├── flink_stream_output.jsonl
+│       └── pipeline_execution_audit.log
+│
+├── models/                          # Serialized trained scikit-learn models
+│   ├── sentiment_model.joblib       # Multinomial Naive Bayes pipeline (1.7 MB)
+│   └── logistic_regression_model.joblib # Logistic Regression pipeline (1.1 MB)
+│
+├── notebooks/
+│   └── sentiment_analysis_exploration.ipynb  # Interactive data science research notebook
+│
+├── reports/                         # Experiment evaluations and architectural documents
+│   ├── airflow_pipeline_report.json # Automated Airflow output metrics
+│   ├── architecture.md              # Deep architectural markdown report
+│   ├── demo_script.md               # Step-by-step viva presentation script
+│   ├── experiment_results.json      # Machine-generated baseline benchmark metrics
+│   └── technical_report.md          # Comprehensive academic technical writeup
+│
+├── src/                             # Core production source code
+│   ├── __init__.py
+│   ├── analytics/
+│   │   ├── __init__.py
+│   │   └── sentiment_analytics.py   # Top n-grams, temporal trends, dataset health KPIs
+│   │
+│   ├── big_data/
+│   │   ├── __init__.py
+│   │   ├── hadoop_streaming_mapper.py    # Hadoop Streaming stdin mapper
+│   │   ├── hadoop_streaming_reducer.py   # Hadoop Streaming stdin reducer
+│   │   ├── mapreduce_simulator.py        # In-memory multi-worker MapReduce engine
+│   │   ├── nosql_storage.py              # MongoDB manager with SQLite/JSON fallback
+│   │   └── spark_engine.py               # Vectorized Spark abstraction & telemetry
+│   │
+│   ├── data_processing/
+│   │   ├── __init__.py
+│   │   ├── load_dataset.py          # Chunked loaders for Sentiment140, Airlines, SQLite
+│   │   └── preprocess.py            # Negation-preserving text normalization engine
+│   │
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── absa_engine.py           # Feature 5: Aspect-Based Sentiment Analysis module
+│   │   ├── evaluate.py              # Cross-validation, ROC-AUC, classification reports
+│   │   ├── predict.py               # Single & batch inference wrappers with confidence
+│   │   ├── train.py                 # Automated training script with stratified splits
+│   │   └── transformer_models.py    # Feature 1: Pretrained DistilBERT & RoBERTa inference
+│   │
+│   ├── orchestration/
+│   │   ├── __init__.py
+│   │   ├── pipeline_tasks.py        # Feature 4: Modular 7-stage Airflow task callables
+│   │   └── dags/
+│   │       └── social_media_sentiment_pipeline.py  # Declarative Airflow DAG definition
+│   │
+│   ├── search/
+│   │   ├── __init__.py
+│   │   ├── elasticsearch_client.py  # Feature 3: ES client factory & offline detector
+│   │   ├── index_manager.py         # Feature 3: Idempotent schema & nested ABSA mapping
+│   │   └── search_service.py        # Feature 3: Full-text search, filters, bulk indexing
+│   │
+│   ├── streaming/
+│   │   ├── __init__.py
+│   │   ├── flink_pipeline.py        # Feature 2: Flink stream processor & simulator
+│   │   └── sample_stream.py         # Feature 2: Realistic event-time stream generator
+│   │
+│   └── visualization/
+│       ├── __init__.py
+│       └── charts.py                # Matplotlib & Seaborn plots (ROC, Donut, Heatmap)
+│
+└── tests/                           # 40 Automated unit tests (100% passing)
+    ├── __init__.py
+    ├── test_absa.py                 # Tests for positive, negative, mixed, and no-aspect cases
+    ├── test_analytics.py            # Tests for n-grams and dataset health
+    ├── test_big_data.py             # Tests for MapReduce, NoSQL, and Spark engine
+    ├── test_dataset_loading.py      # Tests for schema validation on all 3 datasets
+    ├── test_elasticsearch.py        # Tests for ES mapping, search queries, and offline check
+    ├── test_models.py               # Tests for Naive Bayes and Logistic Regression
+    ├── test_orchestration.py        # Tests for Airflow DAG structure and 7 tasks
+    ├── test_preprocessing.py        # Tests for negation preservation and contractions
+    ├── test_streaming.py            # Tests for event generation, mappers, and Flink simulator
+    └── test_transformer_models.py   # Tests for DistilBERT, RoBERTa, and model comparisons
+```
+
+
+====================================================================================================
+8. END-TO-END PIPELINE ARCHITECTURES
+====================================================================================================
+
+Pipeline 1: Offline Batch Training & Evaluation Pipeline
+```
+[Raw Datasets (Sentiment140 / Airlines)]
+           │
+           ▼
+[load_dataset.py: Stratified 80/20 Train-Test Split]
+           │
+     ┌─────┴─────────────────────────┐
+     ▼                               ▼
+[Train Split (39,839 rows)]     [Test Split (9,960 rows held out)]
+     │                               │
+     ▼                               │
+[preprocess.py: Negation Clean]      │
+     │                               │
+     ▼                               │
+[TfidfVectorizer: (1,2) N-Grams]     │
+     │                               │
+     ▼                               │
+[Model Fit: Naive Bayes / LR]        │
+     │                               │
+     ▼                               ▼
+[Evaluate Pipeline on Test Split: Strict No-Leakage Verification]
+     │
+     ▼
+[Serialize Artifacts: models/*.joblib & reports/experiment_results.json]
+```
+
+Pipeline 2: Real-Time Apache Flink Streaming Pipeline
+```
+[Incoming Social Media Event Stream (sample_stream.py)]
+           │
+           ▼
+[Stage 1: Validation & Schema Check (Non-empty text, Timestamp)]
+           │
+           ▼
+[Stage 2: Text Normalization (clean_text with Negation Retention)]
+           │
+           ▼
+[Stage 3: Multi-Model Inference (Naive Bayes / RoBERTa + ABSA Mining)]
+           │
+           ▼
+[Stage 4: 5-Second Tumbling Window Aggregation (Metrics & Throughput)]
+           │
+     ┌─────┴─────────────────────────┐
+     ▼                               ▼
+[Sink A: Elasticsearch Cluster]  [Sink B: Local JSONL File / Streamlit UI]
+```
+
+Pipeline 3: Apache Airflow 7-Stage Orchestration Pipeline
+```
+(task_ingest_and_validate)
+           │
+           ▼
+(task_clean_and_preprocess)
+           │
+           ▼
+(task_predict_sentiment)
+           │
+           ▼
+(task_aspect_sentiment_analysis)
+           │
+           ▼
+(task_elasticsearch_indexing)
+           │
+           ▼
+(task_generate_analytics_report)
+           │
+           ▼
+(task_pipeline_completion_log)
+```
+
+
+====================================================================================================
+9. DEEP-DIVE MODULE-BY-MODULE FUNCTIONAL BREAKDOWN
+====================================================================================================
+
+1. `src/data_processing/load_dataset.py`:
+   - Functions: `load_sentiment140()`, `load_airline_tweets()`, `load_sqlite_tweets()`, `get_dataset_summary()`.
+   - Innovation: Sentiment140 has no header and is 239MB. Instead of reading all 1.6M rows into memory
+     during quick runs, it supports stratified half-head/half-tail chunk sampling (400,000 negative,
+     400,000 positive), normalizing column names into a unified standard schema:
+     `['id', 'sentiment', 'sentiment_label', 'date', 'query', 'user', 'text']`.
+
+2. `src/data_processing/preprocess.py`:
+   - Functions: `clean_text()`, `expand_contractions()`, `tokenize()`.
+   - Negation Preservation: Uses `NEGATION_WORDS = {"not", "no", "nor", "neither", "never", "cannot"}`.
+     Subtracts negation words from the stopword list so phrases like *"not disappointed"* are preserved.
+
+3. `src/big_data/mapreduce_simulator.py`:
+   - Implements `MapReduceEngine` with configurable worker threads (`num_workers=4`).
+   - Executes true distributed semantics:
+     * Split Phase: Divides text corpus into uniform data chunks.
+     * Map Phase: Executes `word_count_mapper` or `sentiment_count_mapper`.
+     * Combiner Phase: Performs in-memory local reduction on each mapper to minimize network shuffle.
+     * Shuffle & Sort Phase: Partitions intermediate keys across reducers using hash partitioning.
+     * Reduce Phase: Aggregates total occurrences with `sum_reducer`.
+
+4. `src/models/train.py` & `evaluate.py`:
+   - Embeds vectorizer and classifier in `sklearn.pipeline.Pipeline`.
+   - Generates confusion matrices, ROC curves, macro F1-scores, and training durations.
+
+5. `app.py` (Streamlit Web Interface):
+   - 1,571 lines of responsive Python UI code.
+   - 13 distinct navigation tabs:
+     1. 🏠 Home / Overview (System Architecture & KPIs)
+     2. 📊 Dataset Explorer (Inspect raw datasets & schemas)
+     3. 🔍 Sentiment Analyzer (Single tweet real-time inference with probability gauge)
+     4. 📁 Batch CSV Analysis (Upload CSV and download predictions)
+     5. 📈 Sentiment Analytics (N-gram frequencies, donut charts, temporal trends)
+     6. 🎯 Model Performance (Side-by-side benchmark, ROC curves, confusion matrices)
+     7. 🤖 Transformer NLP (BERT & RoBERTa contextual comparison)
+     8. 🎯 Aspect-Based Sentiment (ABSA clause decomposition & entity polarity)
+     9. 🔎 Elasticsearch Search & Index (Full-text search, filters, schema inspector)
+     10. 🌊 Real-Time Streaming (Apache Flink event monitor, tumbling window metrics)
+     11. ⚙️ Airflow Pipeline Orchestrator (7-stage DAG flowchart, live task runner)
+     12. ⚡ Big Data & MapReduce Lab (Interactive step-by-step MapReduce visualizer)
+     13. 📚 Documentation & Viva Guide (Architecture report, viva Q&A, CLI guide)
+
+
+====================================================================================================
+10. THE 5 TEACHER-MANDATED ADVANCED ADDITIONS IN DETAIL
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+Feature 1: Transformer-Based NLP (BERT & RoBERTa)
+----------------------------------------------------------------------------------------------------
+- Implementation File: `src/models/transformer_models.py`
+- Pretrained Checkpoints:
+  1. DistilBERT: `distilbert/distilbert-base-uncased-finetuned-sst-2-english`
+     * Stanford Sentiment Treebank (SST-2) binary sentiment
+     * 66 Million parameters, 268 MB checkpoint
+     * Fast CPU inference (~25 ms)
+  2. Twitter RoBERTa: `cardiffnlp/twitter-roberta-base-sentiment-latest`
+     * 124 Million real-world tweets pretraining
+     * 125 Million parameters, 499 MB checkpoint
+     * 3-Class social sentiment (negative, neutral, positive)
+- Features:
+  * Single-tweet and batch prediction (`predict_batch`)
+  * Memory protection: lazy loading via singleton pattern; explicit `unload()` method
+  * Empirical benchmark against baseline:
+    - Input: *"The delivery was fast, and the product quality is excellent."*
+    - Multinomial Naive Bayes: POSITIVE (64.88% confidence)
+    - Logistic Regression:     POSITIVE (67.21% confidence)
+    - DistilBERT:              POSITIVE (99.99% confidence)
+    - Twitter RoBERTa:         POSITIVE (98.37% confidence)
+
+----------------------------------------------------------------------------------------------------
+Feature 2: Apache Flink Real-Time Distributed Stream Processing
+----------------------------------------------------------------------------------------------------
+- Implementation File: `src/streaming/flink_pipeline.py` & `src/streaming/sample_stream.py`
+- Stream Processing Flow:
+  1. Stream Source: Ingests tweet events with millisecond-precision timestamps (`timestamp`).
+  2. Validation Operator: Validates non-null text, user handle, and event ID.
+  3. Normalization Operator: Executes negation-preserving cleaning in streaming memory.
+  4. Inference & ABSA Operator: Computes sentiment and extracts aspect targets.
+  5. Tumbling Window Operator: Aggregates sentiment distribution every 5 seconds.
+  6. Multi-Sink Dispatcher: Sends records to Elasticsearch Sink and JSONL Audit Sink.
+- Windows Execution vs. Production:
+  Apache Flink does not distribute native binary wheels for `apache-flink` on Windows. We engineered:
+  * A fully verified local `FlinkStreamSimulator` running live tumbling windows on Windows.
+  * A declarative `FlinkStreamingPipeline` containing the formal PyFlink DataStream API code for
+    deployment on Linux/Docker clusters.
+- Verified Execution: Throughput of 5.63 events/sec with real-time sliding window aggregations.
+
+----------------------------------------------------------------------------------------------------
+Feature 3: Elasticsearch Distributed Indexing & Search
+----------------------------------------------------------------------------------------------------
+- Implementation File: `src/search/elasticsearch_client.py`, `index_manager.py`, `search_service.py`
+- Schema Mapping (`social_media_sentiment` index):
+  * `tweet_id`: keyword
+  * `user`: keyword
+  * `original_text`: text (custom analyzer with standard tokenizer and lowercase/stop filters)
+  * `clean_text`: text
+  * `timestamp`: date format
+  * `predicted_sentiment`: keyword
+  * `model_name`: keyword
+  * `confidence`: float
+  * `aspects`: nested object containing `aspect` (keyword), `sentiment` (keyword), `confidence` (float),
+    `polarity_score` (float), and `context_clause` (text).
+- Search Features:
+  * Multi-match full-text keyword query across original and clean text.
+  * Term filters for predicted sentiment (`positive`, `negative`, `neutral`).
+  * Nested queries on `aspects.aspect` and `aspects.sentiment`.
+  * Date range filtering (`gte`, `lte`).
+  * Idempotent index creation (checks `indices.exists()` before creation; never destroys data).
+  * Automatic offline fallback: If Elasticsearch daemon is offline, queries cleanly fall back to local
+    JSONL files without crashing.
+
+----------------------------------------------------------------------------------------------------
+Feature 4: Apache Airflow 7-Stage DAG Orchestration
+----------------------------------------------------------------------------------------------------
+- Implementation File: `src/orchestration/dags/social_media_sentiment_pipeline.py` & `pipeline_tasks.py`
+- The 7 Pipeline Stages:
+  Stage 1: `task_ingest_and_validate` -> Ingests sample batch, validates schema (`id`, `text`, `sentiment`).
+  Stage 2: `task_clean_and_preprocess` -> Cleans text while retaining negation tokens.
+  Stage 3: `task_predict_sentiment` -> Runs classifier inference and attaches confidence.
+  Stage 4: `task_aspect_sentiment_analysis` -> Extracts aspect terms and assigns polarity.
+  Stage 5: `task_elasticsearch_indexing` -> Bulk indexes records into Elasticsearch or local fallback.
+  Stage 6: `task_generate_analytics_report` -> Generates `reports/airflow_pipeline_report.json`.
+  Stage 7: `task_pipeline_completion_log` -> Writes audit trail to `pipeline_execution_audit.log`.
+- Engineering Excellence:
+  * Sub-second DAG parsing: Heavy models are imported inside task functions, preventing DAG import timeouts.
+  * Standalone `AirflowPipelineRunner`: Allows testing all 7 stages in Python directly on Windows
+    (executed in 8.7 seconds with 7/7 success).
+
+----------------------------------------------------------------------------------------------------
+Feature 5: Aspect-Based Sentiment Analysis (ABSA)
+----------------------------------------------------------------------------------------------------
+- Implementation File: `src/models/absa_engine.py`
+- Mechanism:
+  1. Clause Boundary Segmentation: Uses regex patterns across contrastive discourse markers
+     (`but`, `however`, `although`, `yet`, `while`, `on the other hand`) to segment text into opposing clauses.
+  2. Opinion Target Extraction: Matches common domain compound entities (`camera`, `battery life`,
+     `customer service`, `cabin crew`, `seat comfort`, `flight delay`, `wifi`, `food`).
+  3. Contextual Polarity Scoring: Evaluates local sentiment words surrounding the aspect, applying
+     negation modifiers (`not`, `never`) and intensifiers (`extremely`, `really`).
+  4. Synthesizer: If both positive and negative aspects exist, outputs overall sentiment as **MIXED**.
+- Verified Test Case:
+  * Text: *"The camera is excellent, but the battery life is disappointing."*
+  * Aspect 1: "camera" -> POSITIVE (Confidence: 84.0%, Polarity: +1.0)
+  * Aspect 2: "battery life" -> NEGATIVE (Confidence: 85.3%, Polarity: -1.2, Contrasting Clause: True)
+  * Synthesized Overall: **MIXED** (2 aspects detected)
+
+
+====================================================================================================
+11. DATASET SCHEMAS, PREPROCESSING LOGIC & NEGATION PRESERVATION
+====================================================================================================
+
+A. Sentiment140 Dataset (`training.1600000.processed.noemoticon.csv`):
+   - Rows: 1,600,000 | Size: 238.8 MB | Columns: 6 (no header)
+   - Schema:
+     Column 0: target (0 = negative, 4 = positive)
+     Column 1: id (Twitter ID)
+     Column 2: date (e.g., "Mon Apr 06 22:19:45 PDT 2009")
+     Column 3: query (e.g., "NO_QUERY")
+     Column 4: user (e.g., "_TheSpecialOne_")
+     Column 5: text (raw tweet string)
+
+B. US Airline Tweets Dataset (`Tweets.csv`):
+   - Rows: 14,640 | Size: 3.4 MB | Columns: 15
+   - Schema: `tweet_id`, `airline_sentiment` (negative: 9,178, neutral: 3,099, positive: 2,363),
+     `airline_sentiment_confidence`, `negativereason`, `airline`, `text`, `tweet_created`, `tweet_location`.
+
+C. Preprocessing Logic:
+   Step 1: HTML entity decoding (`&amp;` -> `&`, `&lt;` -> `<`).
+   Step 2: URL removal (`https?://\S+|www\.\S+` -> `""`).
+   Step 3: User mention stripping (`@\w+` -> `""`).
+   Step 4: Hashtag symbol removal with token preservation (`#delay` -> `delay`).
+   Step 5: Contraction expansion (`can't` -> `cannot`, `won't` -> `will not`, `n't` -> ` not`).
+   Step 6: Lowercasing and non-alphabetic character stripping.
+   Step 7: Negation-preserving stopword filtering (`CUSTOM_STOPWORDS = NLTK_STOPWORDS - NEGATION_WORDS`).
+
+
+====================================================================================================
+12. EMPIRICAL RESULTS, PERFORMANCE METRICS & BENCHMARKS
+====================================================================================================
+All metrics below were computed on a held-out test set of 9,960 tweets (20% stratified split of 50,000
+balanced Sentiment140 records) and recorded in `reports/experiment_results.json`:
+
+| Performance Metric          | Multinomial Naive Bayes | Logistic Regression | DistilBERT (SST-2) | Twitter RoBERTa |
+| :-------------------------- | :---------------------: | :-----------------: | :----------------: | :-------------: |
+| **Accuracy**                | **76.22%**              | **77.53%**          | **88.40%**         | **90.15%**      |
+| **Macro Precision**         | 76.24%                  | 77.54%              | 88.45%             | 90.20%          |
+| **Macro Recall**            | 76.22%                  | 77.53%              | 88.40%             | 90.15%          |
+| **Macro F1-Score**          | 0.7622                  | 0.7753              | 0.8835             | 0.8980          |
+| **ROC-AUC Score**           | 0.8433                  | **0.8566**          | 0.9410             | 0.9570          |
+| **Training Duration**       | **0.96 seconds**        | 1.36 seconds        | Pretrained         | Pretrained      |
+| **CPU Inference Latency**   | **< 1.5 ms / tweet**    | < 1.8 ms / tweet    | ~25 ms / tweet     | ~45 ms / tweet  |
+
+Confusion Matrices (9,960 Test Records):
+- Multinomial Naive Bayes:
+  Actual Negative: 3,867 True Negatives  | 1,116 False Positives
+  Actual Positive: 1,252 False Negatives | 3,725 True Positives
+
+- Logistic Regression:
+  Actual Negative: 3,828 True Negatives  | 1,155 False Positives
+  Actual Positive: 1,083 False Negatives | 3,894 True Positives
+
+
+====================================================================================================
+13. TESTING, QUALITY ASSURANCE & VERIFICATION (40 TESTS)
+====================================================================================================
+Execution Command:
+`.venv\Scripts\python.exe -m pytest tests/ -v`
+
+Complete Test Breakdown (40 Passed in 53.34 seconds):
+- `tests/test_absa.py` (5 tests):
+  * `test_positive_aspect_sentiment`: Verifies positive aspect extraction.
+  * `test_negative_aspect_sentiment`: Verifies negative aspect extraction.
+  * `test_mixed_contrasting_aspect_sentiment`: Verifies contrasting clause splitting ("camera" vs "battery life").
+  * `test_no_detectable_aspects`: Verifies graceful fallback on general sentences without entities.
+  * `test_empty_input`: Verifies empty string handling.
+- `tests/test_analytics.py` (3 tests):
+  * `test_compute_sentiment_distribution`: Verifies class percentage calculation.
+  * `test_get_top_ngrams`: Verifies n-gram tokenization frequency counter.
+  * `test_compute_dataset_health`: Verifies null and duplicate detection.
+- `tests/test_big_data.py` (4 tests):
+  * `test_mapreduce_word_count`: Verifies multi-worker MapReduce word count.
+  * `test_mapreduce_sentiment_count`: Verifies multi-worker MapReduce sentiment count.
+  * `test_nosql_storage_fallback`: Verifies MongoDB ping with SQLite/JSON fallback.
+  * `test_spark_manager_telemetry`: Verifies Spark manager telemetry dictionary.
+- `tests/test_dataset_loading.py` (4 tests):
+  * `test_load_airline_tweets`: Verifies schema and 3-class distribution.
+  * `test_load_sentiment140_sample`: Verifies stratified sampling.
+  * `test_sentiment140_schema`: Verifies 6 headerless columns.
+  * `test_sqlite_loading`: Verifies SQLite read-only connection.
+- `tests/test_elasticsearch.py` (5 tests):
+  * `test_index_mapping_structure`: Verifies nested mapping for ABSA.
+  * `test_idempotent_index_creation_exists`: Verifies existing index is preserved.
+  * `test_idempotent_index_creation_new`: Verifies new index is created if absent.
+  * `test_search_service_query_assembly`: Verifies query syntax construction.
+  * `test_offline_detection`: Verifies offline check returns boolean cleanly.
+- `tests/test_models.py` (5 tests):
+  * `test_model_file_exists`: Verifies `.joblib` model binary presence.
+  * `test_predict_text_positive`: Verifies positive prediction on test sentence.
+  * `test_predict_text_negative`: Verifies negative prediction on test sentence.
+  * `test_predict_dataframe`: Verifies batch DataFrame inference.
+  * `test_prediction_probabilities`: Verifies probability calibration summing to 1.0.
+- `tests/test_orchestration.py` (2 tests):
+  * `test_airflow_dag_structure`: Verifies DAG ID, schedule, and operator types.
+  * `test_independent_pipeline_tasks`: Executes all 7 Airflow stages sequentially.
+- `tests/test_preprocessing.py` (5 tests):
+  * `test_clean_text_basic`: Verifies whitespace and lowercase normalization.
+  * `test_negation_preservation`: Verifies "not", "never", "cannot" are retained.
+  * `test_contraction_expansion`: Verifies "can't" -> "cannot", "won't" -> "will not".
+  * `test_url_mention_removal`: Verifies removal of `@user` and `https://...`.
+  * `test_empty_and_special_text`: Verifies edge cases.
+- `tests/test_streaming.py` (3 tests):
+  * `test_create_stream_event`: Verifies event timestamp and structure.
+  * `test_stream_pipeline_stages`: Verifies validation -> normalization -> inference.
+  * `test_flink_stream_simulator`: Verifies tumbling window stream execution.
+- `tests/test_transformer_models.py` (4 tests):
+  * `test_transformer_registry`: Verifies BERT and RoBERTa metadata registration.
+  * `test_bert_single_prediction`: Verifies DistilBERT inference on CPU.
+  * `test_empty_input_fallback`: Verifies empty input protection.
+  * `test_compare_with_baseline`: Verifies multi-model benchmark function.
+
+
+====================================================================================================
+14. COMPREHENSIVE VIVA VOCE & TECHNICAL INTERVIEW PREPARATION (15 QUESTIONS & ANSWERS)
+====================================================================================================
+
+Q1: What is the main objective of this project?
+A1: The main objective is to build an end-to-end Big Data and NLP platform capable of ingesting,
+    preprocessing, classifying, indexing, streaming, and orchestrating massive social media datasets
+    using both statistical ML (Naive Bayes, Logistic Regression) and modern deep learning (BERT, RoBERTa),
+    complemented by Apache Flink, Elasticsearch, and Apache Airflow.
+
+Q2: Why did you choose Sentiment140 and US Airline Tweets?
+A2: Sentiment140 provides Big Data scale (1.6 Million rows, 239 MB) with binary labels (0=negative,
+    4=positive) to test distributed ingestion, MapReduce, and scalability. The US Airline Tweets dataset
+    (14,640 rows) provides real-world domain complexity with 3 classes (negative, neutral, positive) and
+    rich metadata (airline, negative reason, flight location).
+
+Q3: Why is negation preservation critical in social media text preprocessing?
+A3: Standard stopword lists (like default NLTK) remove words like "not", "no", and "never". In sentiment
+    analysis, stripping "not" from "not happy" turns a strongly negative sentence into a positive "happy"
+    token, completely inverting the classification. Our preprocessor explicitly preserves negation tokens.
+
+Q4: What is data leakage and how did your architecture prevent it?
+A4: Data leakage occurs when test set information inadvertently influences training (e.g., fitting the
+    TF-IDF vocabulary across the entire dataset). We prevented it by wrapping the vectorizer and classifier
+    inside a strict scikit-learn `Pipeline` that is fit exclusively on `X_train`.
+
+Q5: Why does Logistic Regression slightly outperform Naive Bayes?
+A5: Naive Bayes makes a strict "naive" assumption that all words are conditionally independent given the
+    class. Logistic Regression jointly optimizes weights using binary cross-entropy loss, allowing it to
+    model correlated word pairs (e.g., bigrams like "not_good") more effectively.
+
+Q6: How do DistilBERT and RoBERTa differ from traditional TF-IDF models?
+A6: TF-IDF treats text as an unordered "bag of words" based on term frequencies. Transformers use
+    multi-head self-attention mechanisms to generate deep contextual word embeddings, capturing word
+    order, subtle syntactic dependencies, and polysemy (words having different meanings in different contexts).
+
+Q7: What is Aspect-Based Sentiment Analysis (ABSA) and why is it needed?
+A7: A single review often contains multiple conflicting opinions (e.g., "The camera is excellent, but
+    the battery life is disappointing"). Traditional classifiers average the signals and output an
+    ambiguous neutral score. ABSA segments clauses along discourse markers ("but") and assigns separate
+    sentiment scores to individual entities ("camera" -> positive, "battery life" -> negative).
+
+Q8: How does Apache Flink handle real-time streaming compared to Spark Streaming?
+A8: Apache Flink is a true event-driven stream processor that processes events record-by-record with
+    native event-time watermarking. Spark Streaming (in standard micro-batch mode) discretizes streams into
+    small batches. Flink achieves lower latency (sub-second) for continuous streaming analytics.
+
+Q9: How is Elasticsearch integrated into this architecture?
+A9: Elasticsearch provides distributed full-text indexing using an inverted index. We defined a tailored
+    schema mapping with nested properties for ABSA entities. This allows users to perform sub-second
+    searches across millions of tweets and filter simultaneously by sentiment, date, and aspect target.
+
+Q10: What role does Apache Airflow play in this system?
+A10: Airflow orchestrates the end-to-end data pipeline across 7 discrete stages (Ingest -> Clean ->
+     Predict -> ABSA -> Index -> Report -> Log). It provides dependency management, task retries,
+     audit logging, and failure isolation.
+
+Q11: How does your system handle offline external dependencies (MongoDB, Elasticsearch)?
+A11: The system incorporates defensive health-check wrappers with short timeouts (e.g., 1.5 seconds).
+     If MongoDB or Elasticsearch is offline, the code automatically activates resilient local fallbacks
+     (SQLite for NoSQL, JSONL files for Elasticsearch), ensuring zero crashes during live demonstrations.
+
+Q12: Why did you use DistilBERT instead of full BERT-Large?
+A12: DistilBERT retains 97% of BERT's language understanding while being 40% smaller (66M vs 340M parameters)
+     and 60% faster. This allows the model to run efficiently on standard laptop CPUs without requiring an
+     expensive dedicated CUDA GPU.
+
+Q13: What is the purpose of the in-memory MapReduce engine in `src/big_data/`?
+A13: It serves as a pedagogical and architectural simulation demonstrating how Hadoop MapReduce works
+     under the hood: splitting data chunks, running parallel multi-threaded mappers, applying combiners,
+     executing hash-partitioned shuffle and sort, and aggregating in reducers.
+
+Q14: What metrics did you prioritize during evaluation and why?
+A14: We prioritized Macro F1-score and ROC-AUC over simple accuracy. Simple accuracy can be misleading on
+     imbalanced datasets (e.g., US Airlines is 63% negative). Macro F1-score equally weights precision and
+     recall across all classes, ensuring the model does not achieve high accuracy by simply guessing the
+     majority class.
+
+Q15: How can a student run and demonstrate this project right now?
+A15: Open PowerShell in the project directory and execute:
+     1. `.venv\Scripts\python.exe -m streamlit run app.py` (opens UI at http://localhost:8501)
+     2. `.venv\Scripts\python.exe -m pytest tests/ -v` (runs all 40 unit tests)
+     3. `.venv\Scripts\python.exe -m src.streaming.flink_pipeline --records 10` (runs Flink stream)
+     4. `.venv\Scripts\python.exe -m src.orchestration.pipeline_tasks --sample-size 25` (runs Airflow DAG)
+
+
+====================================================================================================
+15. SYSTEM LIMITATIONS & FUTURE SCOPE
+====================================================================================================
+
+Current Limitations:
+1. Hardware Bound: Transformer models run in CPU mode (`torch.device('cpu')`). While fast enough for
+   interactive single-tweet inference (~25-45 ms), real-time processing of the full Twitter firehose
+   (10,000+ tweets/sec) requires multi-GPU clusters (e.g., NVIDIA A100/H100 with TensorRT).
+2. Operating System Disparities: Apache Flink and Apache Airflow are designed natively for Linux/UNIX
+   environments. On Windows, they require WSL2 (Windows Subsystem for Linux) or Docker containers for
+   multi-node cluster operation. The project provides verified standalone simulators to bridge this gap.
+3. Complex Sarcasm: Sarcastic social media posts without explicit negation tokens (e.g., "Oh great,
+   another 4-hour delay, just what I needed!") remain difficult for rule-based and shallow ML models,
+   though transformers handle them significantly better.
+
+Future Scope:
+1. Cloud Deployment: Containerize all components using Docker Compose and deploy to Kubernetes (EKS/GKE)
+   with Helm charts for auto-scaling.
+2. Fine-Tuning LLMs: Perform Parameter-Efficient Fine-Tuning (PEFT / LoRA) on open-source LLMs (like
+   Llama 3 or Mistral 7B) specifically for social media sarcasm and multi-lingual sentiment.
+3. Live Kafka Firehose: Connect an Apache Kafka distributed event bus to ingest live tweets directly
+   from the official Twitter/X Developer API v2.
+4. Neo4j Knowledge Graph: Link user handles, mentions, and retweets in a graph database to perform
+   social network community detection and influencer sentiment tracking.
+
+====================================================================================================
+                             END OF COMPREHENSIVE IDEA & ARCHITECTURE BLUEPRINT
+====================================================================================================
