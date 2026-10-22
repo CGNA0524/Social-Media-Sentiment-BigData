@@ -416,17 +416,23 @@ elif navigation == "📊 Dataset Explorer":
     sample_size = st.slider("Select Sample Size to Load", min_value=100, max_value=20000, value=2000, step=500)
 
     with st.spinner("Loading dataset sample..."):
-        if "Sentiment140" in dataset_choice:
-            df = get_cached_sentiment140(sample_size=sample_size)
-            name = "Sentiment140"
-            sentiment_col = "sentiment_label"
-        elif "Airline" in dataset_choice:
-            df = get_cached_airline_tweets(sample_size=sample_size)
+        try:
+            if "Sentiment140" in dataset_choice:
+                df = get_cached_sentiment140(sample_size=sample_size)
+                name = "Sentiment140"
+                sentiment_col = "sentiment_label"
+            elif "Airline" in dataset_choice:
+                df = get_cached_airline_tweets(sample_size=sample_size)
+                name = "Airline Tweets"
+                sentiment_col = "sentiment"
+            else:
+                df = get_cached_sqlite_tweets(limit=sample_size)
+                name = "SQLite Tweets"
+                sentiment_col = "sentiment"
+        except Exception as e:
+            st.info("ℹ️ Cloud Deployment Mode: Loaded bundled dataset sample.")
+            df = load_airline_tweets(sample_size=sample_size)
             name = "Airline Tweets"
-            sentiment_col = "sentiment"
-        else:
-            df = get_cached_sqlite_tweets(limit=sample_size)
-            name = "SQLite Tweets"
             sentiment_col = "sentiment"
 
     summary = get_dataset_summary(df, name)

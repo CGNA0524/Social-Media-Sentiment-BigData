@@ -22,10 +22,8 @@ htmlcov/
 .env
 *.env.local
 
-# Large Raw Datasets (preserve on local disk, do not commit to VCS)
+# Large Raw Datasets (preserve on local disk, do not commit >100MB files to VCS)
 data/raw/training.1600000.processed.noemoticon.csv
-data/raw/database.sqlite
-data/raw/Tweets.csv
 
 # Processed & Temporary Results
 data/processed/*.parquet
