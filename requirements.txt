@@ -1,0 +1,25 @@
+# Core Data Science & NLP
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+nltk>=3.8.0
+joblib>=1.3.0
+
+# Visualization & Presentation
+matplotlib>=3.7.0
+seaborn>=0.12.0
+streamlit>=1.30.0
+
+# Storage & Serialization
+pymongo>=4.5.0
+pyarrow>=14.0.0
+
+# Testing & Quality Assurance
+pytest>=7.4.0
+
+# Advanced NLP & Transformer Models
+transformers>=4.36.0
+torch>=2.0.0
+
+# Distributed Search & Indexing
+elasticsearch>=8.0.0

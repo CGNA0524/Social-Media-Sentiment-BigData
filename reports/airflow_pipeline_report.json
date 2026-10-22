@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-10-22T05:12:38.264994+00:00",
+  "total_records_processed": 5,
+  "sentiment_distribution": {
+    "positive": 2,
+    "negative": 3
+  },
+  "sentiment_ratios": {
+    "positive": 0.4,
+    "negative": 0.6
+  },
+  "top_aspects_mentioned": {
+    "ticket": 1
+  }
+}

@@ -1,0 +1,49 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment Variables & Secrets
+.env
+*.env.local
+
+# Large Raw Datasets (preserve on local disk, do not commit to VCS)
+data/raw/training.1600000.processed.noemoticon.csv
+data/raw/database.sqlite
+data/raw/Tweets.csv
+
+# Processed & Temporary Results
+data/processed/*.parquet
+data/processed/*.json
+data/processed/*.jsonl
+data/results/*.sqlite
+data/results/*.json
+
+# Large Model Binary Weights (optional if exceeding Git LFS)
+# models/*.joblib
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Airflow, Flink & Model Cache
+orchestration/airflow/
+*.log
+.cache/
+huggingface/
